@@ -18,4 +18,12 @@ public class Rasterization {
             for (int col = x; col < x + width; ++col)
                 pixelWriter.setColor(col, row, color);
     }
+
+    public static void drawLineVu(
+            final GraphicsContext graphicsContext,
+            final int x1, final int y1,
+            final int x2, final int y2,
+            final Color color){
+        
+    }
 }
