@@ -19,25 +19,60 @@ public class Rasterization {
                 pixelWriter.setColor(col, row, color);
     }
 
+    private static Color getColorWithIntensity(Color color, double intensity){
+        return Color.hsb(color.getHue(), color.getSaturation(), color.getBrightness(), intensity);
+    }
+
+    private static double floatPart(double num){
+        return num % 1;
+    }
     public static void drawLineVu(
             final GraphicsContext graphicsContext,
-            final int x1, final int y1,
-            final int x2, final int y2,
+            double x1, double y1,
+            double x2, double y2,
             final Color color) {
         final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
 
-        if (x1 == x2) { // vertical line
-            for (int i = y1; i <= y2; i++){
-                pixelWriter.setColor(x1, i, color);
+        if(x1 > x2){ // swap
+            double temp = x1;
+            x1 = x2;
+            x2 = temp;
+
+            temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
+
+        int startX = (int) x1;
+        int startY = (int) y1;
+        int endX = (int) x2;
+        int endY = (int) y2;
+
+        if (startX == endX) { // vertical line
+            for (int i = startY; i <= endY; i++) {
+                pixelWriter.setColor(startX, i, color);
             }
             return;
         }
 
-        if (y1 == y2) { // horizontal line
-            for (int i = x1; i <= x2; i++) {
-                pixelWriter.setColor(i, y1, color);
+        if (startY == endY) { // horizontal line
+            for (int i = startX; i <= endX; i++) {
+                pixelWriter.setColor(i, startY, color);
             }
             return;
+        }
+
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+
+        double k = dy / dx;
+
+        double currY = y1;
+        for (int currX = startX; currX <= endX; currX++){
+            pixelWriter.setColor(currX, (int) currY, getColorWithIntensity(color, 1 - floatPart(currY)));
+            pixelWriter.setColor(currX, (int) currY + 1, getColorWithIntensity(color, floatPart(currY)));
+
+            currY += k;
         }
     }
 }
