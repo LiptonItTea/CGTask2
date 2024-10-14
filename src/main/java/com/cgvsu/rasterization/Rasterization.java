@@ -23,7 +23,21 @@ public class Rasterization {
             final GraphicsContext graphicsContext,
             final int x1, final int y1,
             final int x2, final int y2,
-            final Color color){
-        
+            final Color color) {
+        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+
+        if (x1 == x2) { // vertical line
+            for (int i = y1; i <= y2; i++){
+                pixelWriter.setColor(x1, i, color);
+            }
+            return;
+        }
+
+        if (y1 == y2) { // horizontal line
+            for (int i = x1; i <= x2; i++) {
+                pixelWriter.setColor(i, y1, color);
+            }
+            return;
+        }
     }
 }
