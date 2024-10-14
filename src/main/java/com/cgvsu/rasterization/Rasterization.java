@@ -64,15 +64,41 @@ public class Rasterization {
 
         double dx = x2 - x1;
         double dy = y2 - y1;
+        if(Math.abs(dx) > Math.abs(dy)){
+            double k = dy / dx;
 
-        double k = dy / dx;
+            double currY = y1;
+            for (int currX = startX; currX <= endX; currX++){
+                double intensity = floatPart(currY);
 
-        double currY = y1;
-        for (int currX = startX; currX <= endX; currX++){
-            pixelWriter.setColor(currX, (int) currY, getColorWithIntensity(color, 1 - floatPart(currY)));
-            pixelWriter.setColor(currX, (int) currY + 1, getColorWithIntensity(color, floatPart(currY)));
+                pixelWriter.setColor(currX, (int) currY, getColorWithIntensity(color, 1 - intensity));
+                pixelWriter.setColor(currX, (int) currY + 1, getColorWithIntensity(color, intensity));
 
-            currY += k;
+                currY += k;
+            }
+        }
+        else{
+            if(startY > endY){
+                int temp = startY;
+                startY = endY;
+                endY = temp;
+
+                double dtemp = x1;
+                x1 = x2;
+                x2 = dtemp;
+            }
+
+            double k = dx / dy;
+
+            double currX = x1;
+            for (int currY = startY; currY <= endY; currY++){
+                double intensity = floatPart(currX);
+
+                pixelWriter.setColor((int) currX, currY, getColorWithIntensity(color, 1 - intensity));
+                pixelWriter.setColor((int) currX + 1, currY, getColorWithIntensity(color, intensity));
+
+                currX += k;
+            }
         }
     }
 }
