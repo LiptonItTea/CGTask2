@@ -4,6 +4,9 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
@@ -25,22 +28,16 @@ public class RasterizationController {
         canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-//                System.out.printf("%f %f%n", mouseEvent.getX(), mouseEvent.getY());
                 canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-                Rasterization.drawLineVu(canvas.getGraphicsContext2D(), 400, 400, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
+                Rasterization.drawLineVu(canvas.getGraphicsContext2D().getPixelWriter(), 400, 400, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
             }
         });
-
-//        Rasterization.drawRectangle(canvas.getGraphicsContext2D(), 200, 300, 200, 100, Color.CHOCOLATE);
-//        Rasterization.drawRectangle(canvas.getGraphicsContext2D(), 250, 250, 50, 200, Color.AQUA);
-        Rasterization.drawLineVu(canvas.getGraphicsContext2D(), 10, 10, 10, 50, Color.BLACK);
-        Rasterization.drawLineVu(canvas.getGraphicsContext2D(), 10, 10, 50, 10, Color.BLACK);
 
         double x1 = 400;
         double y1 = 400;
         double len = 200;
 
-        int amount = 50;
+        int amount = 100;
         double deltaTheta = 2 * Math.PI / amount;
 
         for (int i = 0; i < amount; i++){
@@ -48,9 +45,8 @@ public class RasterizationController {
             double x2 = x1 + Math.cos(theta) * len;
             double y2 = y1 + Math.sin(theta) * len;
 
-            Rasterization.drawLineVu(canvas.getGraphicsContext2D(), x1, y1, x2, y2, Color.BLACK);
+            Rasterization.drawLineVu(canvas.getGraphicsContext2D().getPixelWriter(), x1, y1, x2, y2, Color.BLACK);
         }
-//        Rasterization.drawLineVu(canvas.getGraphicsContext2D(), 10, 10, 50, 20, Color.BLACK);
     }
 
 }

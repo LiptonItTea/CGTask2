@@ -1,7 +1,9 @@
 package com.cgvsu.rasterization;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 public class Rasterization {
@@ -20,6 +22,15 @@ public class Rasterization {
     }
 
     private static Color getColorWithIntensity(Color color, double intensity){
+//        double red = color.getRed() * bgColor.getRed();
+//        double green = color.getGreen() * bgColor.getGreen();
+//        double blue = color.getBlue() * bgColor.getBlue();
+//
+//        int ir = (int) (red * 255);
+//        int ig = (int) (green * 255);
+//        int ib = (int) (blue * 255);
+//
+//        return Color.rgb(ir, ig, ib, intensity);
         return Color.hsb(color.getHue(), color.getSaturation(), color.getBrightness(), intensity);
     }
 
@@ -28,10 +39,9 @@ public class Rasterization {
     }
 
     private static void drawHorizontalLine(
-            final GraphicsContext graphicsContext,
+            final PixelWriter pixelWriter,
             int x1, int y, int x2,
             final Color color) {
-        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
 
         if(x1 > x2){
             int temp = x1;
@@ -45,10 +55,9 @@ public class Rasterization {
     }
 
     private static void drawVerticalLine(
-            final GraphicsContext graphicsContext,
+            final PixelWriter pixelWriter,
             int x, int y1, int y2,
             final Color color) {
-        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
 
         if(y1 > y2){
             int temp = y1;
@@ -62,11 +71,11 @@ public class Rasterization {
     }
 
     public static void drawLineVu(
-            final GraphicsContext graphicsContext,
+            final PixelWriter pixelWriter,
             double x1, double y1,
             double x2, double y2,
             final Color color) {
-        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+//        final PixelReader pixelReader = graphicsContext.getCanvas().snapshot()
 
         int startX = (int) x1;
         int startY = (int) y1;
@@ -74,12 +83,12 @@ public class Rasterization {
         int endY = (int) y2;
 
         if (startX == endX) { // vertical line
-            drawVerticalLine(graphicsContext, startX, startY, endY, color);
+            drawVerticalLine(pixelWriter, startX, startY, endY, color);
             return;
         }
 
         if (startY == endY) { // horizontal line
-            drawHorizontalLine(graphicsContext, startX, startY, endX, color);
+            drawHorizontalLine(pixelWriter, startX, startY, endX, color);
             return;
         }
 
@@ -113,8 +122,7 @@ public class Rasterization {
 
                 currY += k;
             }
-        }
-        else{ // primary axis - Oy
+        } else{ // primary axis - Oy
             // coords swapped by x, need to swap by y
             if(y1 > y2){ // swap
                 double temp = x1;
