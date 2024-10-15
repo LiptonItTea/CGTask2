@@ -1,8 +1,10 @@
 package com.cgvsu.rasterizationfxapp;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 import com.cgvsu.rasterization.*;
@@ -19,6 +21,15 @@ public class RasterizationController {
     private void initialize() {
         anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
         anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
+
+        canvas.setOnMouseMoved(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+//                System.out.printf("%f %f%n", mouseEvent.getX(), mouseEvent.getY());
+                canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                Rasterization.drawLineVu(canvas.getGraphicsContext2D(), 400, 400, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
+            }
+        });
 
 //        Rasterization.drawRectangle(canvas.getGraphicsContext2D(), 200, 300, 200, 100, Color.CHOCOLATE);
 //        Rasterization.drawRectangle(canvas.getGraphicsContext2D(), 250, 250, 50, 200, Color.AQUA);

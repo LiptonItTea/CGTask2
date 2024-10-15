@@ -26,12 +26,62 @@ public class Rasterization {
     private static double floatPart(double num){
         return num % 1;
     }
+
+    private static void drawHorizontalLine(
+            final GraphicsContext graphicsContext,
+            int x1, int y, int x2,
+            final Color color) {
+        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+
+        if(x1 > x2){
+            int temp = x1;
+            x1 = x2;
+            x2 = temp;
+        }
+
+        for (int x = x1; x <= x2; x++){
+            pixelWriter.setColor(x, y, color);
+        }
+    }
+
+    private static void drawVerticalLine(
+            final GraphicsContext graphicsContext,
+            int x, int y1, int y2,
+            final Color color) {
+        final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+
+        if(y1 > y2){
+            int temp = y1;
+            y1 = y2;
+            y2 = temp;
+        }
+
+        for (int y = y1; y <= y2; y++){
+            pixelWriter.setColor(x, y, color);
+        }
+    }
+
     public static void drawLineVu(
             final GraphicsContext graphicsContext,
             double x1, double y1,
             double x2, double y2,
             final Color color) {
         final PixelWriter pixelWriter = graphicsContext.getPixelWriter();
+
+        int startX = (int) x1;
+        int startY = (int) y1;
+        int endX = (int) x2;
+        int endY = (int) y2;
+
+        if (startX == endX) { // vertical line
+            drawVerticalLine(graphicsContext, startX, startY, endY, color);
+            return;
+        }
+
+        if (startY == endY) { // horizontal line
+            drawHorizontalLine(graphicsContext, startX, startY, endX, color);
+            return;
+        }
 
         if(x1 > x2){ // swap
             double temp = x1;
@@ -41,30 +91,17 @@ public class Rasterization {
             temp = y1;
             y1 = y2;
             y2 = temp;
-        }
 
-        int startX = (int) x1;
-        int startY = (int) y1;
-        int endX = (int) x2;
-        int endY = (int) y2;
-
-        if (startX == endX) { // vertical line
-            for (int i = startY; i <= endY; i++) {
-                pixelWriter.setColor(startX, i, color);
-            }
-            return;
-        }
-
-        if (startY == endY) { // horizontal line
-            for (int i = startX; i <= endX; i++) {
-                pixelWriter.setColor(i, startY, color);
-            }
-            return;
+            startX = (int) x1;
+            startY = (int) y1;
+            endX = (int) x2;
+            endY = (int) y2;
         }
 
         double dx = x2 - x1;
         double dy = y2 - y1;
-        if(Math.abs(dx) > Math.abs(dy)){
+        if(Math.abs(dx) > Math.abs(dy)){ // primary axis - Ox
+            // already swapped coords so don't do it here.
             double k = dy / dx;
 
             double currY = y1;
@@ -77,17 +114,22 @@ public class Rasterization {
                 currY += k;
             }
         }
-        else{
-            if(startY > endY){
-                int temp = startY;
-                startY = endY;
-                endY = temp;
-
-                double dtemp = x1;
+        else{ // primary axis - Oy
+            // coords swapped by x, need to swap by y
+            if(y1 > y2){ // swap
+                double temp = x1;
                 x1 = x2;
-                x2 = dtemp;
-            }
+                x2 = temp;
 
+                temp = y1;
+                y1 = y2;
+                y2 = temp;
+
+                startX = (int) x1;
+                startY = (int) y1;
+                endX = (int) x2;
+                endY = (int) y2;
+            }
             double k = dx / dy;
 
             double currX = x1;
