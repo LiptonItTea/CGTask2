@@ -37,7 +37,7 @@ public class RasterizationController {
         double y1 = 400;
         double len = 200;
 
-        int amount = 100;
+        int amount = 200;
         double deltaTheta = 2 * Math.PI / amount;
 
         for (int i = 0; i < amount; i++){

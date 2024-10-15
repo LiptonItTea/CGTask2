@@ -38,61 +38,23 @@ public class Rasterization {
         return num % 1;
     }
 
-    private static void drawHorizontalLine(
-            final PixelWriter pixelWriter,
-            int x1, int y, int x2,
-            final Color color) {
-
-        if(x1 > x2){
-            int temp = x1;
-            x1 = x2;
-            x2 = temp;
-        }
-
-        for (int x = x1; x <= x2; x++){
-            pixelWriter.setColor(x, y, color);
-        }
-    }
-
-    private static void drawVerticalLine(
-            final PixelWriter pixelWriter,
-            int x, int y1, int y2,
-            final Color color) {
-
-        if(y1 > y2){
-            int temp = y1;
-            y1 = y2;
-            y2 = temp;
-        }
-
-        for (int y = y1; y <= y2; y++){
-            pixelWriter.setColor(x, y, color);
-        }
-    }
-
     public static void drawLineVu(
             final PixelWriter pixelWriter,
             double x1, double y1,
             double x2, double y2,
             final Color color) {
-//        final PixelReader pixelReader = graphicsContext.getCanvas().snapshot()
+        boolean steep = Math.abs(y2 - y1) > Math.abs(x2 - x1);
 
-        int startX = (int) x1;
-        int startY = (int) y1;
-        int endX = (int) x2;
-        int endY = (int) y2;
+        if(steep) {
+            double temp = x1;
+            x1 = y1;
+            y1 = temp;
 
-        if (startX == endX) { // vertical line
-            drawVerticalLine(pixelWriter, startX, startY, endY, color);
-            return;
+            temp = x2;
+            x2 = y2;
+            y2 = temp;
         }
-
-        if (startY == endY) { // horizontal line
-            drawHorizontalLine(pixelWriter, startX, startY, endX, color);
-            return;
-        }
-
-        if(x1 > x2){ // swap
+        if(x1 > x2){
             double temp = x1;
             x1 = x2;
             x2 = temp;
@@ -100,54 +62,61 @@ public class Rasterization {
             temp = y1;
             y1 = y2;
             y2 = temp;
-
-            startX = (int) x1;
-            startY = (int) y1;
-            endX = (int) x2;
-            endY = (int) y2;
         }
 
         double dx = x2 - x1;
         double dy = y2 - y1;
-        if(Math.abs(dx) > Math.abs(dy)){ // primary axis - Ox
-            // already swapped coords so don't do it here.
-            double k = dy / dx;
 
-            double currY = y1;
-            for (int currX = startX; currX <= endX; currX++){
-                double intensity = floatPart(currY);
+        double gradient;
+        if(dx == 0) {
+            gradient = 1.0;
+        }
+        else {
+            gradient = dy / dx;
+        }
 
-                pixelWriter.setColor(currX, (int) currY, getColorWithIntensity(color, 1 - intensity));
-                pixelWriter.setColor(currX, (int) currY + 1, getColorWithIntensity(color, intensity));
+        double xend = Math.round(x1);
+        double yend = Math.round(y1) + gradient * (xend - x1);
+        double xgap = 1 - floatPart(x1 + 0.5);
+        int xpxl1 = (int) xend;
+        int ypxl1 = (int) yend;
+        if(steep) {
+            pixelWriter.setColor(ypxl1, xpxl1, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(ypxl1 + 1, xpxl1, getColorWithIntensity(color, floatPart(yend) * xgap));
+        }
+        else {
+            pixelWriter.setColor(xpxl1, ypxl1, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(xpxl1, ypxl1 + 1, getColorWithIntensity(color, floatPart(yend) * xgap));
+        }
+        double intery = yend + gradient;
 
-                currY += k;
+        xend = Math.round(x2);
+        yend = Math.round(y2) + gradient * (xend - x2);
+        xgap = floatPart(x1 + 0.5);
+        int xpxl2 = (int) xend;
+        int ypxl2 = (int) yend;
+        if(steep) {
+            pixelWriter.setColor(ypxl2, xpxl2, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(ypxl2 + 1, xpxl2, getColorWithIntensity(color, floatPart(yend) * xgap));
+        }
+        else {
+            pixelWriter.setColor(xpxl2, ypxl2, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(xpxl2, ypxl2 + 1, getColorWithIntensity(color, floatPart(yend) * xgap));
+        }
+
+
+        if(steep) {
+            for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++){
+                pixelWriter.setColor((int) intery, x, getColorWithIntensity(color, 1 - floatPart(intery)));
+                pixelWriter.setColor((int) (intery + 1), x, getColorWithIntensity(color, floatPart(intery)));
+                intery += gradient;
             }
-        } else{ // primary axis - Oy
-            // coords swapped by x, need to swap by y
-            if(y1 > y2){ // swap
-                double temp = x1;
-                x1 = x2;
-                x2 = temp;
-
-                temp = y1;
-                y1 = y2;
-                y2 = temp;
-
-                startX = (int) x1;
-                startY = (int) y1;
-                endX = (int) x2;
-                endY = (int) y2;
-            }
-            double k = dx / dy;
-
-            double currX = x1;
-            for (int currY = startY; currY <= endY; currY++){
-                double intensity = floatPart(currX);
-
-                pixelWriter.setColor((int) currX, currY, getColorWithIntensity(color, 1 - intensity));
-                pixelWriter.setColor((int) currX + 1, currY, getColorWithIntensity(color, intensity));
-
-                currX += k;
+        }
+        else {
+            for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++){
+                pixelWriter.setColor(x, (int) intery, getColorWithIntensity(color, 1 - floatPart(intery)));
+                pixelWriter.setColor(x, (int) (intery + 1), getColorWithIntensity(color, floatPart(intery)));
+                intery += gradient;
             }
         }
     }
