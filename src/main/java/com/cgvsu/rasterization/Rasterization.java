@@ -44,13 +44,13 @@ public class Rasterization {
     public static void drawLineVu(
             final PixelWriter pixelWriter,
             final PixelReader pixelReader,
-            double x1, double y1,
-            double x2, double y2,
+            int x1, int y1,
+            int x2, int y2,
             final Color color) {
         boolean steep = Math.abs(y2 - y1) > Math.abs(x2 - x1);
 
         if(steep) {
-            double temp = x1;
+            int temp = x1;
             x1 = y1;
             y1 = temp;
 
@@ -59,7 +59,7 @@ public class Rasterization {
             y2 = temp;
         }
         if(x1 > x2){
-            double temp = x1;
+            int temp = x1;
             x1 = x2;
             x2 = temp;
 
@@ -135,54 +135,55 @@ public class Rasterization {
 //                }
 //            }
 //        }
-        double dx = x2 - x1;
-        double dy = y2 - y1;
-        double gradient;
-        if(dx == 0) {
-            gradient = 1.0;
-        }
-        else {
-            gradient = dy / dx;
-        }
+        double A = y2 - y1;
+        double B = -(x2 - x1);
+        double C = -(y2 - y1) * x1 + (x2 - x1) * y1;
+        double sqrtAB = Math.sqrt(A * A + B * B);
 
-        int xpxl1 = (int) x1;
-        int ypxl1 = (int) y1;
-        int xpxl2 = (int) x2;
-        int ypxl2 = (int) y2;
-        int currY = xpxl1;
+        int dx = Math.abs(x2 - x1);
+        int dy = Math.abs(y2 - y1);
 
-        double dir = y1 - y2;
+        int currY = y1;
+
+        int dir = y2 - y1;
         if(dir > 0)
-            dir = 1.0;
+            dir = 1;
         else if(dir < 0)
-            dir = -1.0;
+            dir = -1;
 
-        if (dy == 0) {
-            dir = 0;
-        }
-        gradient = Math.abs(gradient);
-        double error = 0;
+        int deltaerr = dy + 1;
+        int error = 0;
         if (steep) {
-            for (int x = xpxl1; x <= xpxl2; x++){
-                pixelWriter.setColor(currY, x, getColorWithIntensity(color, pixelReader.getColor(currY, x), 1.0));
+            for (int x = x1; x <= x2; x++){
+                double gap = Math.abs(A * x + B * currY + C) / sqrtAB;
+                double gap2 = Math.abs(A * x + B * (currY + dir) + C) / sqrtAB;
+//                pixelWriter.setColor(currY, x, getColorWithIntensity(color, pixelReader.getColor(currY, x), 1.0));
 
-                error += gradient;
-                if(error >= 1.0){
-                    error -= 1.0;
+                pixelWriter.setColor(currY, x, getColorWithIntensity(color, pixelReader.getColor(currY, x), 1 - gap / (gap + gap2)));
+                pixelWriter.setColor(currY + dir, x, getColorWithIntensity(color, pixelReader.getColor(currY - 1, x), 1 - gap2 / (gap + gap2)));
+
+                error += deltaerr;
+                if(error >= (dx + 1)){
+                    error -= dx + 1;
                     currY += dir;
                 }
             }
         }
         else {
-            for (int x = xpxl1; x <= xpxl2; x++){
-                pixelWriter.setColor(x, currY, getColorWithIntensity(color, pixelReader.getColor(x, currY), 1.0));
+            for (int x = x1; x <= x2; x++){
+                double gap = Math.abs(A * x + B * currY + C) / sqrtAB;
+                double gap2 = Math.abs(A * x + B * (currY + dir) + C) / sqrtAB;
+//                pixelWriter.setColor(x, currY, getColorWithIntensity(color, pixelReader.getColor(x, currY), 1.0));
 
-                error += gradient;
-                if(error >= 1.0){
-                    error -= 1.0;
+                pixelWriter.setColor(x, currY, getColorWithIntensity(color, pixelReader.getColor(x, currY), 1 - gap / (gap + gap2)));
+                pixelWriter.setColor(x, currY + dir, getColorWithIntensity(color, pixelReader.getColor(x, currY - 1), 1 - gap2 / (gap + gap2)));
+
+                error += deltaerr;
+                if(error >= (dx + 1)){
+                    error -= dx + 1;
                     currY += dir;
                 }
             }
-        }
+//        }
     }
 }
