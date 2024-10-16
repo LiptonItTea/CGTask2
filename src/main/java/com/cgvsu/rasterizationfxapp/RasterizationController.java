@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.BlendMode;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -29,12 +30,19 @@ public class RasterizationController {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 canvas.getGraphicsContext2D().clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-                Rasterization.drawLineVu(canvas.getGraphicsContext2D().getPixelWriter(), 400, 400, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
+                WritableImage image = new WritableImage(800, 600);
+                PixelWriter pixelWriter = image.getPixelWriter();
+                PixelReader pixelReader = image.getPixelReader();
+                Rasterization.drawLineVu(pixelWriter, pixelReader, 400, 400, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
+                canvas.getGraphicsContext2D().drawImage(image, 0, 0);
             }
         });
+        WritableImage image = new WritableImage(800, 600);
+        PixelWriter pixelWriter = image.getPixelWriter();
+        PixelReader pixelReader = image.getPixelReader();
 
         double x1 = 400;
-        double y1 = 400;
+        double y1 = 300;
         double len = 200;
 
         int amount = 200;
@@ -45,8 +53,10 @@ public class RasterizationController {
             double x2 = x1 + Math.cos(theta) * len;
             double y2 = y1 + Math.sin(theta) * len;
 
-            Rasterization.drawLineVu(canvas.getGraphicsContext2D().getPixelWriter(), x1, y1, x2, y2, Color.BLACK);
+            Rasterization.drawLineVu(pixelWriter, pixelReader, x1, y1, x2, y2, Color.BLACK);
         }
+
+        canvas.getGraphicsContext2D().drawImage(image, 0, 0);
     }
 
 }

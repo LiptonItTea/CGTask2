@@ -21,17 +21,20 @@ public class Rasterization {
                 pixelWriter.setColor(col, row, color);
     }
 
-    private static Color getColorWithIntensity(Color color, double intensity){
+    private static Color getColorWithIntensity(Color color, Color bgColor, double intensity){
 //        double red = color.getRed() * bgColor.getRed();
 //        double green = color.getGreen() * bgColor.getGreen();
 //        double blue = color.getBlue() * bgColor.getBlue();
-//
-//        int ir = (int) (red * 255);
-//        int ig = (int) (green * 255);
-//        int ib = (int) (blue * 255);
-//
-//        return Color.rgb(ir, ig, ib, intensity);
-        return Color.hsb(color.getHue(), color.getSaturation(), color.getBrightness(), intensity);
+        double red = Math.min(color.getRed(), bgColor.getRed());
+        double green = Math.min(color.getGreen(), bgColor.getGreen());
+        double blue = Math.min(color.getBlue(), bgColor.getBlue());
+
+        int ir = (int) (red * 255);
+        int ig = (int) (green * 255);
+        int ib = (int) (blue * 255);
+
+        return Color.rgb(ir, ig, ib, intensity);
+//        return Color.hsb(color.getHue(), color.getSaturation(), color.getBrightness(), intensity);
     }
 
     private static double floatPart(double num){
@@ -40,6 +43,7 @@ public class Rasterization {
 
     public static void drawLineVu(
             final PixelWriter pixelWriter,
+            final PixelReader pixelReader,
             double x1, double y1,
             double x2, double y2,
             final Color color) {
@@ -81,12 +85,12 @@ public class Rasterization {
         int xpxl1 = (int) xend;
         int ypxl1 = (int) yend;
         if(steep) {
-            pixelWriter.setColor(ypxl1, xpxl1, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
-            pixelWriter.setColor(ypxl1 + 1, xpxl1, getColorWithIntensity(color, floatPart(yend) * xgap));
+            pixelWriter.setColor(ypxl1, xpxl1, getColorWithIntensity(color, pixelReader.getColor(ypxl1, xpxl1), (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(ypxl1 + 1, xpxl1, getColorWithIntensity(color, pixelReader.getColor(ypxl1 + 1, xpxl1), floatPart(yend) * xgap));
         }
         else {
-            pixelWriter.setColor(xpxl1, ypxl1, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
-            pixelWriter.setColor(xpxl1, ypxl1 + 1, getColorWithIntensity(color, floatPart(yend) * xgap));
+            pixelWriter.setColor(xpxl1, ypxl1, getColorWithIntensity(color, pixelReader.getColor(xpxl1, ypxl1), (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(xpxl1, ypxl1 + 1, getColorWithIntensity(color, pixelReader.getColor(xpxl1, ypxl1 + 1), floatPart(yend) * xgap));
         }
         double intery = yend + gradient;
 
@@ -96,26 +100,26 @@ public class Rasterization {
         int xpxl2 = (int) xend;
         int ypxl2 = (int) yend;
         if(steep) {
-            pixelWriter.setColor(ypxl2, xpxl2, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
-            pixelWriter.setColor(ypxl2 + 1, xpxl2, getColorWithIntensity(color, floatPart(yend) * xgap));
+            pixelWriter.setColor(ypxl2, xpxl2, getColorWithIntensity(color, pixelReader.getColor(ypxl2, xpxl2), (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(ypxl2 + 1, xpxl2, getColorWithIntensity(color, pixelReader.getColor(ypxl2 + 1, xpxl2), floatPart(yend) * xgap));
         }
         else {
-            pixelWriter.setColor(xpxl2, ypxl2, getColorWithIntensity(color, (1 - floatPart(yend)) * xgap));
-            pixelWriter.setColor(xpxl2, ypxl2 + 1, getColorWithIntensity(color, floatPart(yend) * xgap));
+            pixelWriter.setColor(xpxl2, ypxl2, getColorWithIntensity(color, pixelReader.getColor(xpxl2, ypxl2), (1 - floatPart(yend)) * xgap));
+            pixelWriter.setColor(xpxl2, ypxl2 + 1, getColorWithIntensity(color, pixelReader.getColor(xpxl2, ypxl2 + 1), floatPart(yend) * xgap));
         }
 
 
         if(steep) {
             for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++){
-                pixelWriter.setColor((int) intery, x, getColorWithIntensity(color, 1 - floatPart(intery)));
-                pixelWriter.setColor((int) (intery + 1), x, getColorWithIntensity(color, floatPart(intery)));
+                pixelWriter.setColor((int) intery, x, getColorWithIntensity(color, pixelReader.getColor((int) intery, x), 1 - floatPart(intery)));
+                pixelWriter.setColor((int) (intery + 1), x, getColorWithIntensity(color, pixelReader.getColor((int) (intery + 1), x), floatPart(intery)));
                 intery += gradient;
             }
         }
         else {
             for (int x = xpxl1 + 1; x <= xpxl2 - 1; x++){
-                pixelWriter.setColor(x, (int) intery, getColorWithIntensity(color, 1 - floatPart(intery)));
-                pixelWriter.setColor(x, (int) (intery + 1), getColorWithIntensity(color, floatPart(intery)));
+                pixelWriter.setColor(x, (int) intery, getColorWithIntensity(color, pixelReader.getColor(x, (int) intery), 1 - floatPart(intery)));
+                pixelWriter.setColor(x, (int) (intery + 1), getColorWithIntensity(color, pixelReader.getColor(x, (int) (intery + 1)), floatPart(intery)));
                 intery += gradient;
             }
         }
