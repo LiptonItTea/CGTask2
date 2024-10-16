@@ -33,7 +33,7 @@ public class RasterizationController {
                 WritableImage image = new WritableImage(800, 600);
                 PixelWriter pixelWriter = image.getPixelWriter();
                 PixelReader pixelReader = image.getPixelReader();
-                Rasterization.drawLineVu(pixelWriter, pixelReader, 400, 400, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
+                Rasterization.drawLineVu(pixelWriter, pixelReader, 400, 300, mouseEvent.getX(), mouseEvent.getY(), Color.BLACK);
                 canvas.getGraphicsContext2D().drawImage(image, 0, 0);
             }
         });
