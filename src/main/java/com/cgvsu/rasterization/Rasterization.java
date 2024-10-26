@@ -80,7 +80,8 @@ public class Rasterization {
         else {
             gradient = dy / dx;
         }
-        int dir = (gradient > 0) ? 1 : -1;
+//        int dir = (gradient > 0) ? 1 : -1;
+        int dir = 1;
 
         double xend = Math.round(x1);
         double yend = Math.round(y1) + gradient * (xend - x1);
@@ -111,30 +112,32 @@ public class Rasterization {
             pixelWriter.setColor(xpxl2, ypxl2 - dir, getColorWithIntensity(color, pixelReader.getColor(xpxl2, ypxl2 - dir), (1 - floatPart(yend)) * xgap));
         }
 
-        gradient = Math.abs(gradient);
-        double error = 0;
+//        gradient = Math.abs(gradient);
+        System.out.printf("%d %d %d %f%n", xpxl1, xpxl2, (int) intery, gradient);
         if(steep) {
             for (int x = xpxl1; x <= xpxl2; x++){
-                pixelWriter.setColor((int) intery, x, getColorWithIntensity(color, pixelReader.getColor((int) intery, x), floatPart(error)));
-                pixelWriter.setColor((int) (intery - dir), x, getColorWithIntensity(color, pixelReader.getColor((int) (intery - dir), x), 1 - floatPart(error)));
+                pixelWriter.setColor((int) intery, x, getColorWithIntensity(color, pixelReader.getColor((int) intery, x), floatPart(intery)));
+                pixelWriter.setColor((int) (intery - dir), x, getColorWithIntensity(color, pixelReader.getColor((int) (intery - dir), x), 1 - floatPart(intery)));
 
-                error += gradient;
-                if(error >= 1.0){
-                    error -= 1.0;
-                    intery += dir;
-                }
+                intery += gradient;
+//                error += gradient;
+//                if(error >= 1.0){
+//                    error -= 1.0;
+//                    intery += dir;
+//                }
             }
         }
         else {
             for (int x = xpxl1; x <= xpxl2; x++){
-                pixelWriter.setColor(x, (int) intery, getColorWithIntensity(color, pixelReader.getColor(x, (int) intery), floatPart(error)));
-                pixelWriter.setColor(x, (int) (intery - dir), getColorWithIntensity(color, pixelReader.getColor(x, (int) (intery - dir)), 1 - floatPart(error)));
+                pixelWriter.setColor(x, (int) intery, getColorWithIntensity(color, pixelReader.getColor(x, (int) intery), floatPart(intery)));
+                pixelWriter.setColor(x, (int) (intery - dir), getColorWithIntensity(color, pixelReader.getColor(x, (int) (intery - dir)), 1 - floatPart(intery)));
 
-                error += gradient;
-                if(error >= 1.0){
-                    error -= 1.0;
-                    intery += dir;
-                }
+                intery += gradient;
+//                error += gradient;
+//                if(error >= 1.0){
+//                    error -= 1.0;
+//                    intery += dir;
+//                }
             }
         }
 //        double A = y2 - y1;
