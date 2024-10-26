@@ -39,6 +39,12 @@ public class RasterizationController {
         });
         WritableImage image = new WritableImage(800, 600);
         PixelWriter pixelWriter = image.getPixelWriter();
+        Color white = Color.color(Color.WHITE.getRed(), Color.WHITE.getGreen(), Color.WHITE.getBlue(), 0);
+        for (int i = 0; i < 800; i++){
+            for (int j = 0; j < 600; j++){
+                pixelWriter.setColor(i, j, white);
+            }
+        }
         PixelReader pixelReader = image.getPixelReader();
 
         double x1 = 400;
