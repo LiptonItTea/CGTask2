@@ -61,6 +61,7 @@ public class RasterizationController {
 
             Rasterization.drawLineVu(pixelWriter, pixelReader, (int) x1, (int) y1, (int) x2, (int) y2, Color.BLACK);
         }
+//        Rasterization.drawLineVu(pixelWriter, pixelReader, 400, 300, 395, 303, Color.BLACK);
 
         canvas.getGraphicsContext2D().drawImage(image, 0, 0);
     }
