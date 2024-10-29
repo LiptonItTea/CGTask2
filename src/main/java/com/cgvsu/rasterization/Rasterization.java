@@ -105,7 +105,7 @@ public class Rasterization {
             pixelWriter.setColor(xpxl1, ypxl1, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(xpxl1, ypxl1), 1.0));
         }
         double intery = y1;
-        if(!steep)
+        if(!swap)
             intery += gradient;
 
         xend = x2;
@@ -122,9 +122,9 @@ public class Rasterization {
             pixelWriter.setColor(xpxl2, ypxl2, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(xpxl2, ypxl2), 1.0));
         }
 
-        System.out.printf("%d %d %d %f%n", xpxl1, xpxl2, (int) intery, gradient);
+//        System.out.printf("%d %d %d %f%n", xpxl1, xpxl2, (int) intery, gradient);
         if(steep) {
-            for (int x = xpxl1; x <= xpxl2 - 1; x++){
+            for (int x = xpxl1 + (!swap ? 1 : 0); x <= xpxl2 - (!swap ? 0 : 1); x++){
                 k = interpolationCoefficient(x, intery, xpxl1, ypxl1, xpxl2, ypxl2, swap);
                 pixelWriter.setColor((int) intery, x, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor((int) intery, x), 1 - floatPart(intery)));
                 pixelWriter.setColor((int) (intery + 1), x, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor((int) (intery + 1), x), floatPart(intery)));
@@ -133,7 +133,7 @@ public class Rasterization {
             }
         }
         else {
-            for (int x = xpxl1 + 1; x <= xpxl2; x++){
+            for (int x = xpxl1 + (!swap ? 1 : 0); x <= xpxl2 - (!swap ? 0 : 1); x++){
                 k = interpolationCoefficient(x, intery, xpxl1, ypxl1, xpxl2, ypxl2, swap);
                 pixelWriter.setColor(x, (int) intery, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(x, (int) intery), 1 - floatPart(intery)));
                 pixelWriter.setColor(x, (int) (intery + 1), getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(x, (int) (intery + 1)), floatPart(intery)));
