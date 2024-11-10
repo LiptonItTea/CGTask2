@@ -3,11 +3,10 @@ package com.cgvsu.rasterization;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
 public class Rasterization {
-
+    private static double eps = 0.00001;
     public static void drawRectangle(
             final GraphicsContext graphicsContext,
             final int x, final int y,
@@ -59,7 +58,6 @@ public class Rasterization {
             final Color startColor,
             final Color endColor) {
         boolean steep = Math.abs(y2 - y1) > Math.abs(x2 - x1);
-        boolean swap = false;
         if(steep) {
             double temp = x1;
             x1 = y1;
@@ -69,8 +67,8 @@ public class Rasterization {
             x2 = y2;
             y2 = temp;
         }
-        if(x1 > x2){
-            swap = true;
+        boolean swap = x1 > x2;
+        if(swap){
             double temp = x1;
             x1 = x2;
             x2 = temp;
@@ -84,42 +82,41 @@ public class Rasterization {
         double dy = y2 - y1;
 
         double gradient;
-        if(dx == 0) {
+        if(dx < eps) {
             gradient = 1.0;
         }
         else {
             gradient = dy / dx;
         }
 
-        double xend = x1;
-        double yend = y1;
-        int xpxl1 = (int) xend;
-        int ypxl1 = (int) yend;
-        double k = 0.0;
-        if(swap)
-            k = 1.0;
-        if(steep) {
-            pixelWriter.setColor(ypxl1, xpxl1, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(ypxl1, xpxl1), 1.0));
-        }
-        else {
-            pixelWriter.setColor(xpxl1, ypxl1, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(xpxl1, ypxl1), 1.0));
-        }
+        int xpxl1 = (int) x1;
+        int ypxl1 = (int) y1;
+
+        int xpxl2 = (int) x2;
+        int ypxl2 = (int) y2;
+
         double intery = y1;
         if(!swap)
             intery += gradient;
 
-        xend = x2;
-        yend = y2;
-        int xpxl2 = (int) xend;
-        int ypxl2 = (int) yend;
-        k = 1.0;
-        if(swap)
+        double k;
+        if(!swap) {
             k = 0.0;
-        if(steep) {
-            pixelWriter.setColor(ypxl2, xpxl2, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(ypxl2, xpxl2), 1.0));
+            if(steep) {
+                pixelWriter.setColor(ypxl1, xpxl1, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(ypxl1, xpxl1), 1.0));
+            }
+            else {
+                pixelWriter.setColor(xpxl1, ypxl1, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(xpxl1, ypxl1), 1.0));
+            }
         }
         else {
-            pixelWriter.setColor(xpxl2, ypxl2, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(xpxl2, ypxl2), 1.0));
+            k = 1.0;
+            if(steep) {
+                pixelWriter.setColor(ypxl2, xpxl2, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(ypxl2, xpxl2), 1.0));
+            }
+            else {
+                pixelWriter.setColor(xpxl2, ypxl2, getColorWithIntensity(startColor, endColor, k, pixelReader.getColor(xpxl2, ypxl2), 1.0));
+            }
         }
 
 //        System.out.printf("%d %d %d %f%n", xpxl1, xpxl2, (int) intery, gradient);
